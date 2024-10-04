@@ -1,27 +1,23 @@
 package config
 
 import (
-	"database/sql"
-	"fmt"
 	"log"
-	// "os"
 
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/spf13/viper"
 )
 
-var DB *sql.DB
+func InitConfig(fileName string) *viper.Viper {
+	config := viper.New()
 
-func InitDB() {
-	var err error
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", "experiment", "experiment", "localhost", "beverages_booking")
-	DB, err = sql.Open("mysql", dsn)
+	config.SetConfigName(fileName)
+
+	config.AddConfigPath(".")
+	config.AddConfigPath("$HOME")
+
+	err := config.ReadInConfig()
 	if err != nil {
-		log.Fatal("Error connecting to the database:", err)
+		log.Fatal("Error while parsing configuration file", err)
 	}
 
-	err = DB.Ping()
-	if err != nil {
-		log.Fatal("Database connection failed:", err)
-	}
-	log.Println("Database connected successfully.")
+	return config
 }

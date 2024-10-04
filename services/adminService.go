@@ -1,14 +1,24 @@
 package services
 
 import (
-	"beverages_booking/repositories"
-	"database/sql"
+	"beverages-booking/repositories"
+	"beverages-booking/models"
 	"errors"
 )
 
-func AdminLoginService(db *sql.DB, username, password string) (repositories.Admin, error) {
+type AdminService struct {
+	adminRepository *repositories.AdminRepository
+}
 
-	admin, err := repositories.AdminLogin(db, username, password)
+func NewAdminService(adminRepository *repositories.AdminRepository) *AdminService {
+	return &AdminService{
+		adminRepository: adminRepository,
+	}
+}
+
+func (as AdminService) AdminLogin(username, password string) (*models.Admin, error) {
+
+	admin, err := as.adminRepository.AdminLogin(username, password)
 	if err != nil {
 		return admin, errors.New("invalid credentials")
 	}

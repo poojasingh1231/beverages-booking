@@ -1,25 +1,59 @@
-package main
+package server
 
 import (
-	"beverages_booking/config"
-	"beverages_booking/controllers"
+	"database/sql"
+	"log"
+	"beverages-booking/controllers"
+	"beverages-booking/repositories"
+	"beverages-booking/services"
+
 	"github.com/gin-gonic/gin"
-	"net/http" 
+	"github.com/spf13/viper"
 )
 
-func main() {
-	config.InitDB()
+type HttpServer struct {
+	config            *viper.Viper
+	router            *gin.Engine
+	adminController *controllers.AdminController
+	beverageController *controllers.BeverageController
+	userController *controllers.UserController
+}
 
-	r := gin.Default()
+func InitHttpServer(config *viper.Viper, dbHandler *sql.DB) HttpServer {
+	adminRepository := repositories.NewAdminRepository(dbHandler)
+	beverageRepository := repositories.NewBeverageRepository(dbHandler)
+	userRepository := repositories.NewUserRepository(dbHandler)
 
-	r.POST("/admin/login", controllers.AdminLogin)
-	r.GET("/admin/login-form", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "login.html", nil)
-	})
+	adminService := services.NewAdminService(adminRepository)
+	beverageService := services.NewBeverageService(beverageRepository)
+	userService := services.NewUserService(userRepository)
 
-	r.GET("/admin/beverages", controllers.ListBeverages)      
-	r.POST("/admin/beverages", controllers.CreateBeverage)       
-	r.DELETE("/admin/beverages/:id", controllers.DeleteBeverage)
+	adminController := controllers.NewAdminController(adminService)
+	beverageController := controllers.NewBeverageController(beverageService)
+	userController := controllers.NewUserController(userService)
 
-	r.Run(":8080")
+
+	router := gin.Default()
+
+	router.POST("/user/login", userController.UserLogin)
+	
+	router.POST("/admin/login", adminController.AdminLogin)
+	router.GET("/admin/beverages", beverageController.ListBeverages)
+	router.POST("/admin/beverages", beverageController.CreateBeverage)
+	router.DELETE("/admin/beverages/:id", beverageController.DeleteBeverage)
+
+	return HttpServer{
+		config:            config,
+		router:            router,
+		adminController: adminController,
+		beverageController: beverageController,
+		userController: userController,
+	}
+}
+
+func (hs HttpServer) Start() {
+	err := hs.router.Run(hs.config.GetString("http.server_address"))
+	if err != nil {
+		log.Fatalf("Error while starting HTTP server: %v", err)
+	}
 }
