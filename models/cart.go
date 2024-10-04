@@ -1,4 +1,3 @@
-// models/cart.go
 package models
 
 type Cart struct {
