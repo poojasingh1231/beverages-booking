@@ -31,7 +31,7 @@ func InitHttpServer(config *viper.Viper, dbHandler *sql.DB) HttpServer {
 	cartService := services.NewCartService(cartRepository)
 
 	adminController := controllers.NewAdminController(adminService)
-	beverageController := controllers.NewBeverageController(beverageService)
+	beverageController := controllers.NewBeverageController(beverageService, adminService)
 	userController := controllers.NewUserController(userService)
 	cartController := controllers.NewCartController(cartService)
 

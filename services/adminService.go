@@ -2,9 +2,9 @@ package services
 
 import (
 	"beverages-booking/repositories"
-	"beverages-booking/context"
 	"beverages-booking/models"
 	"errors"
+	"log"
 )
 
 type AdminService struct {
@@ -23,12 +23,21 @@ func (as AdminService) AdminLogin(username, password string) (*models.Admin, err
 	if err != nil {
 		return admin, errors.New("invalid credentials")
 	}
-	context.IsLoggedIn = true
-	context.IsAdmin = true
 	return admin, nil
 }
 
 func (as AdminService) AdminLogout() {
-	context.IsLoggedIn = false
-	context.IsAdmin = false
 }
+
+func (as AdminService) AdminUserExists(userId int, userName string) bool {
+	exists, err := as.adminRepository.AdminUserExists(userId, userName)
+	log.Printf("userid = %d, username= %s", userId, userName)
+	if err != nil {
+		log.Printf("Error checking if admin user exists: %v", err)
+		return true
+	}
+	return exists
+}
+
+
+

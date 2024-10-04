@@ -26,3 +26,16 @@ func (ar AdminRepository) AdminLogin(username, password string) (*models.Admin, 
 	}
 	return &admin, nil
 }
+
+func (ar *AdminRepository) AdminUserExists(userId int, userName string) (bool, error) {
+	var exists bool
+	query := "SELECT EXISTS(SELECT 1 FROM admins WHERE id = ? AND username = ?)"
+	err := ar.db.QueryRow(query, userId, userName).Scan(&exists)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, err
+	}
+	return exists, nil
+}

@@ -3,19 +3,21 @@ package controllers
 import (
 	"beverages-booking/services"
 	"beverages-booking/models"
-	"beverages-booking/context"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"log"
 )
 
 type BeverageController struct {
 	beverageService *services.BeverageService
+	adminService *services.AdminService
 }
 
-func NewBeverageController(beverageService *services.BeverageService) *BeverageController {
+func NewBeverageController(beverageService *services.BeverageService, adminService *services.AdminService) *BeverageController {
 	return &BeverageController{
 		beverageService: beverageService,
+		adminService : adminService,
 	}
 }
 
@@ -30,7 +32,7 @@ func (bc BeverageController) ListBeverages(c *gin.Context) {
 
 
 func (bc BeverageController) CreateBeverage(c *gin.Context) {
-	if (!validateAdmin()) {
+	if (!bc.validateAdmin(c)) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized user"})
 		return
 	}
@@ -51,7 +53,7 @@ func (bc BeverageController) CreateBeverage(c *gin.Context) {
 
 
 func (bc BeverageController) DeleteBeverage(c *gin.Context) {
-	if (!validateAdmin()) {
+	if (!bc.validateAdmin(c)) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized user"})
 		return
 	}
@@ -71,6 +73,17 @@ func (bc BeverageController) DeleteBeverage(c *gin.Context) {
 }
 
 
-func validateAdmin() bool {
-	return context.IsLoggedIn && context.IsAdmin
+func (bc BeverageController) validateAdmin(c *gin.Context) bool {
+
+	log.Printf("Hello")
+	userIdStr := c.Query("user_id")
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return false
+	}
+	userName := c.Query("user_name")
+
+	log.Printf("userid = %d, username= %s", userId, userName)
+	return bc.adminService.AdminUserExists(userId, userName)
 }

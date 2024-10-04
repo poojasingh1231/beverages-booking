@@ -4,7 +4,6 @@ package controllers
 import (
 	"beverages-booking/services"
 	"beverages-booking/models"
-	"beverages-booking/context"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -20,10 +19,14 @@ func NewCartController(cartService *services.CartService) *CartController {
 	}
 }
 
-// GetCartItems retrieves all cart items for the logged-in user.
 func (cc CartController) GetCartItems(c *gin.Context) {
-	userID := context.UserID // Assuming context holds the logged-in user's ID
-	cartItems, err := cc.cartService.GetCartItemsService(userID)
+	userIdStr := c.Query("user_id")
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+	cartItems, err := cc.cartService.GetCartItemsService(userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not retrieve cart items"})
 		return

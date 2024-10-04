@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"beverages-booking/models"
-	"beverages-booking/context"
 	"beverages-booking/services"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -22,10 +21,6 @@ func NewUserController(userService *services.UserService) *UserController {
 }
 
 func (uc UserController) UserLogin(c *gin.Context) {
-	if (context.IsLoggedIn) {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Already logged in, logout first"})
-		return
-	}
 	var credentials struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -45,10 +40,6 @@ func (uc UserController) UserLogin(c *gin.Context) {
 }
 
 func (uc UserController) UserLogout(ctx *gin.Context) {
-	if (context.IsAdmin) {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid Logout attempt"})
-		return
-	}
 	uc.userService.UserLogout()
 	ctx.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
 }
