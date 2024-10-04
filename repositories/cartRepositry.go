@@ -28,8 +28,7 @@ func (cr CartRepository) CreateCartTable() error {
 		price DECIMAL(10,2) NOT NULL,
 		quantity INT NOT NULL,
 		user_id INT NOT NULL,
-		beverage_id INT NOT NULL,
-		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		beverage_id INT NOT NULL
 	)`
 	_, err := cr.db.Exec(createTableQuery)
 	if err != nil {
@@ -58,21 +57,18 @@ func (cr CartRepository) GetCartItems(userID int) ([]*models.Cart, error) {
 	return carts, nil
 }
 
-// AddItem increments the quantity of an item if it exists, or adds it if it's new
 func (cr CartRepository) AddItem(userID int, cart *models.Cart) error {
 	// Check if the item already exists in the user's cart
 	var currentQuantity int
 	err := cr.db.QueryRow("SELECT quantity FROM carts WHERE beverage_id = ? AND user_id = ?", cart.BeverageID, userID).Scan(&currentQuantity)
 
 	if err == sql.ErrNoRows {
-		// Item doesn't exist, insert a new row
 		_, err = cr.db.Exec("INSERT INTO carts (user_id, beverage_id, item_name, description, price, quantity) VALUES (?, ?, ?, ?, ?, ?)",
 			userID, cart.BeverageID, cart.ItemName, cart.Description, cart.Price, 1) // Initialize quantity as 1
 		if err != nil {
 			return err
 		}
 	} else if err == nil {
-		// Item exists, increment the quantity
 		_, err = cr.db.Exec("UPDATE carts SET quantity = quantity + 1 WHERE beverage_id = ? AND user_id = ?", cart.BeverageID, userID)
 		if err != nil {
 			return err
@@ -107,4 +103,11 @@ func (cr CartRepository) RemoveItem(userID int, beverageID int) error {
 		}
 	}
 	return nil
+}
+
+func (cr *CartRepository) ClearCart(userID int) error {
+	// Clear the cart for the specified user ID
+	deleteQuery := `DELETE FROM carts WHERE user_id = ?`
+	_, err := cr.db.Exec(deleteQuery, userID)
+	return err
 }
