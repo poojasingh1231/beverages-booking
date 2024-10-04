@@ -42,7 +42,7 @@ func (ac AdminController) AdminLogin(c *gin.Context) {
 
 func (ac AdminController) AdminLogout(ctx *gin.Context) {
 	if (context.IsAdmin == false) {
-		ctx.JSON(http.Unauthorized, gin.H{"message": "Invalid Logout attempt"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid Logout attempt"})
 		return
 	}
 	ac.adminService.AdminLogout()

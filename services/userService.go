@@ -26,12 +26,14 @@ func (us UserService) UserLogin(username, password string) (*models.User, error)
 	}
 	context.IsLoggedIn = true
 	context.IsAdmin = false
+	context.UserID = (*user).ID
 	return user, nil
 }
 
 func (us UserService) UserLogout() {
 	context.IsLoggedIn = false
 	context.IsAdmin = false
+	context.UserID = -1
 }
 
 func validateUser(user *models.User) *models.ResponseError {

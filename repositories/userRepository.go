@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
-	"strconv"
 )
 
 type UserRepository struct {
@@ -51,7 +50,7 @@ func (ur UserRepository) CreateUser(user *models.User) (*models.User, *models.Re
 	}
 
 	return &models.User{
-		ID:        strconv.FormatInt(userId, 10),
+		ID:        int(userId),
 		Username:  user.Username,
 		Password:  user.Password,
 		Email:     user.Email,

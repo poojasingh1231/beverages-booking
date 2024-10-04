@@ -23,14 +23,17 @@ func InitHttpServer(config *viper.Viper, dbHandler *sql.DB) HttpServer {
 	adminRepository := repositories.NewAdminRepository(dbHandler)
 	beverageRepository := repositories.NewBeverageRepository(dbHandler)
 	userRepository := repositories.NewUserRepository(dbHandler)
+	cartRepository := repositories.NewCartRepository(dbHandler)
 
 	adminService := services.NewAdminService(adminRepository)
 	beverageService := services.NewBeverageService(beverageRepository)
 	userService := services.NewUserService(userRepository)
+	cartService := services.NewCartService(cartRepository)
 
 	adminController := controllers.NewAdminController(adminService)
 	beverageController := controllers.NewBeverageController(beverageService)
 	userController := controllers.NewUserController(userService)
+	cartController := controllers.NewCartController(cartService)
 
 
 	router := gin.Default()
@@ -45,6 +48,12 @@ func InitHttpServer(config *viper.Viper, dbHandler *sql.DB) HttpServer {
 	router.GET("/beverages", beverageController.ListBeverages)
 	router.POST("/beverages", beverageController.CreateBeverage)
 	router.DELETE("/beverages/:id", beverageController.DeleteBeverage)
+
+
+	router.GET("/cart", cartController.GetCartItems)
+	router.PUT("/cart/add", cartController.AddItem)
+	router.DELETE("/cart/remove", cartController.RemoveItem)
+
 
 	return HttpServer{
 		config:            config,

@@ -46,7 +46,7 @@ func (uc UserController) UserLogin(c *gin.Context) {
 
 func (uc UserController) UserLogout(ctx *gin.Context) {
 	if (context.IsAdmin) {
-		ctx.JSON(http.Unauthorized, gin.H{"message": "Invalid Logout attempt"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid Logout attempt"})
 		return
 	}
 	uc.userService.UserLogout()
