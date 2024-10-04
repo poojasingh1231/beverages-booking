@@ -2,6 +2,7 @@ package services
 
 import (
 	"beverages-booking/repositories"
+	"beverages-booking/context"
 	"beverages-booking/models"
 	"errors"
 )
@@ -22,6 +23,12 @@ func (as AdminService) AdminLogin(username, password string) (*models.Admin, err
 	if err != nil {
 		return admin, errors.New("invalid credentials")
 	}
-
+	context.IsLoggedIn = true
+	context.IsAdmin = true
 	return admin, nil
+}
+
+func (as AdminService) AdminLogout() {
+	context.IsLoggedIn = false
+	context.IsAdmin = false
 }

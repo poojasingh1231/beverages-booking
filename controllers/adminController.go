@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"beverages-booking/services"
+	"beverages-booking/context"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -17,6 +18,10 @@ func NewAdminController(adminService *services.AdminService) *AdminController {
 }
 
 func (ac AdminController) AdminLogin(c *gin.Context) {
+	if (context.IsLoggedIn) {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Already logged in, logout first"})
+		return
+	}
 	var credentials struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -33,4 +38,13 @@ func (ac AdminController) AdminLogin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "admin": admin})
+}
+
+func (ac AdminController) AdminLogout(ctx *gin.Context) {
+	if (context.IsAdmin == false) {
+		ctx.JSON(http.Unauthorized, gin.H{"message": "Invalid Logout attempt"})
+		return
+	}
+	ac.adminService.AdminLogout()
+	ctx.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
 }

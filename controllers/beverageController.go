@@ -3,6 +3,7 @@ package controllers
 import (
 	"beverages-booking/services"
 	"beverages-booking/models"
+	"beverages-booking/context"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -29,6 +30,10 @@ func (bc BeverageController) ListBeverages(c *gin.Context) {
 
 
 func (bc BeverageController) CreateBeverage(c *gin.Context) {
+	if (!validateAdmin()) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized user"})
+		return
+	}
 	var beverage =  new(models.Beverage)
 	if err := c.ShouldBindJSON(&beverage); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
@@ -46,6 +51,10 @@ func (bc BeverageController) CreateBeverage(c *gin.Context) {
 
 
 func (bc BeverageController) DeleteBeverage(c *gin.Context) {
+	if (!validateAdmin()) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized user"})
+		return
+	}
 	id := c.Param("id")
 
 	intID, err := strconv.Atoi(id)
@@ -59,4 +68,9 @@ func (bc BeverageController) DeleteBeverage(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Beverage deleted successfully"})
+}
+
+
+func validateAdmin() bool {
+	return context.IsLoggedIn && context.IsAdmin
 }

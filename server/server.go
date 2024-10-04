@@ -36,11 +36,15 @@ func InitHttpServer(config *viper.Viper, dbHandler *sql.DB) HttpServer {
 	router := gin.Default()
 
 	router.POST("/user/login", userController.UserLogin)
+	router.POST("/user/logout", userController.UserLogout)
+	router.POST("/user", userController.CreateUser)
 	
 	router.POST("/admin/login", adminController.AdminLogin)
-	router.GET("/admin/beverages", beverageController.ListBeverages)
-	router.POST("/admin/beverages", beverageController.CreateBeverage)
-	router.DELETE("/admin/beverages/:id", beverageController.DeleteBeverage)
+	router.POST("/admin/logout", adminController.AdminLogout)
+
+	router.GET("/beverages", beverageController.ListBeverages)
+	router.POST("/beverages", beverageController.CreateBeverage)
+	router.DELETE("/beverages/:id", beverageController.DeleteBeverage)
 
 	return HttpServer{
 		config:            config,

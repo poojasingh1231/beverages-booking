@@ -4,6 +4,8 @@ import (
 	"beverages-booking/models"
 	"database/sql"
 	"fmt"
+	"net/http"
+	"strconv"
 )
 
 type UserRepository struct {
@@ -25,4 +27,33 @@ func (ur UserRepository) UserLogin(username, password string) (*models.User, err
 		return nil, fmt.Errorf("invalid credentials")
 	}
 	return &user, nil
+}
+
+func (ur UserRepository) CreateUser(user *models.User) (*models.User, *models.ResponseError) {
+	query := `
+		INSERT INTO runners(username, password, email)
+		VALUES (?, ?, ?, ?)`
+
+	res, err := ur.db.Exec(query, user.Username, user.Password, user.Email)
+	if err != nil {
+		return nil, &models.ResponseError{
+			Message: err.Error(),
+			Status:  http.StatusInternalServerError,
+		}
+	}
+
+	userId, err := res.LastInsertId()
+	if err != nil {
+		return nil, &models.ResponseError{
+			Message: err.Error(),
+			Status:  http.StatusInternalServerError,
+		}
+	}
+
+	return &models.User{
+		ID:        strconv.FormatInt(userId, 10),
+		Username:  user.Username,
+		Password:  user.Password,
+		Email:     user.Email,
+	}, nil
 }
