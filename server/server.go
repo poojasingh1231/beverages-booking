@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"beverages_booking/config"
@@ -7,7 +7,7 @@ import (
 	"net/http" 
 )
 
-func main() {
+func Start() {
 	config.InitDB()
 
 	r := gin.Default()

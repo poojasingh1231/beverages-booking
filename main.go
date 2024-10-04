@@ -1,9 +1,12 @@
 package main
 
 import (
-	"fmt"
+	"beverages_booking/config"
+	"beverages_booking/server"
 )
 
 func main() {
-	fmt.Println("Happy Coding!!!")
+	config.InitDB()
+
+	server.Start()
 }
