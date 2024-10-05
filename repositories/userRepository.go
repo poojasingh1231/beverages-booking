@@ -13,9 +13,21 @@ type UserRepository struct {
 }
 
 func NewUserRepository(dbHandler *sql.DB) *UserRepository {
-	return &UserRepository{
+	var repo = &UserRepository{
 		db: dbHandler,
 	}
+	repo.CreateUserTable()
+	return repo
+}
+func (ur UserRepository) CreateUserTable() error {
+	createTableQuery := `CREATE TABLE IF NOT EXISTS users (
+		id INT AUTO_INCREMENT PRIMARY KEY,
+		username VARCHAR(255) NOT NULL,
+		password VARCHAR(255) NOT NULL,
+		email VARCHAR(255) NOT NULL
+	)`
+	_, err := ur.db.Exec(createTableQuery)
+	return err
 }
 
 func (ur UserRepository) UserLogin(username, password string) (*models.User, error) {

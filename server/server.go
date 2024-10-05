@@ -25,18 +25,21 @@ func InitHttpServer(config *viper.Viper, dbHandler *sql.DB) HttpServer {
 	userRepository := repositories.NewUserRepository(dbHandler)
 	cartRepository := repositories.NewCartRepository(dbHandler)
 	orderRepository := repositories.NewOrderRepository(dbHandler)
+	ratingRepository := repositories.NewRatingRepository(dbHandler)
 
 	adminService := services.NewAdminService(adminRepository)
 	beverageService := services.NewBeverageService(beverageRepository)
 	userService := services.NewUserService(userRepository)
 	cartService := services.NewCartService(cartRepository)
 	orderService := services.NewOrderService(orderRepository, cartRepository)
+	ratingService := services.NewRatingService(ratingRepository)
 
 	adminController := controllers.NewAdminController(adminService)
 	beverageController := controllers.NewBeverageController(beverageService, adminService)
 	userController := controllers.NewUserController(userService)
 	cartController := controllers.NewCartController(cartService)
 	orderController := controllers.NewOrderController(orderService)
+	ratingController := controllers.NewRatingController(ratingService)
 
 
 	router := gin.Default()
@@ -59,6 +62,10 @@ func InitHttpServer(config *viper.Viper, dbHandler *sql.DB) HttpServer {
 
 	router.POST("/orders", orderController.Order)
 	router.GET("/orders/history", orderController.ShowHistory)
+
+	router.POST("/ratings", ratingController.AddRating)
+    router.GET("/ratings/:beverage_id", ratingController.GetRatings)
+    router.GET("/reviews", ratingController.GetAllReviews)
 
 
 

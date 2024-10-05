@@ -11,10 +11,22 @@ type AdminRepository struct {
 	transaction *sql.Tx
 }
 
-func NewAdminRepository(dbHAndler *sql.DB) *AdminRepository {
-	return &AdminRepository{
-		db: dbHAndler,
+func NewAdminRepository(dbHandler *sql.DB) *AdminRepository {
+	var repo = &AdminRepository{
+		db: dbHandler,
 	}
+	repo.CreateAdminTable();
+	return repo;
+}
+
+func (ar AdminRepository) CreateAdminTable() error {
+	createTableQuery := `CREATE TABLE IF NOT EXISTS admins (
+		id INT AUTO_INCREMENT PRIMARY KEY,
+		username VARCHAR(255) NOT NULL,
+		password VARCHAR(255) NOT NULL
+	)`
+	_, err := ar.db.Exec(createTableQuery)
+	return err
 }
 
 func (ar AdminRepository) AdminLogin(username, password string) (*models.Admin, error) {

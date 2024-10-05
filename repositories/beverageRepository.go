@@ -12,9 +12,23 @@ type BeverageRepository struct {
 }
 
 func NewBeverageRepository(dbHandler *sql.DB) *BeverageRepository {
-	return &BeverageRepository{
+	var repo = &BeverageRepository{
 		db: dbHandler,
 	}
+	repo.CreateBeverageTable()
+	return repo
+}
+
+func (br BeverageRepository) CreateBeverageTable() error {
+	createTableQuery := `CREATE TABLE IF NOT EXISTS beverages (
+		id INT AUTO_INCREMENT PRIMARY KEY,
+		name VARCHAR(255) NOT NULL,
+		type VARCHAR(100) NOT NULL,
+		description TEXT NOT NULL,
+		price DECIMAL(10,2) NOT NULL
+	)`
+	_, err := br.db.Exec(createTableQuery)
+	return err
 }
 
 func (br BeverageRepository) GetAllBeverages() ([]*models.Beverage, error) {
@@ -26,7 +40,7 @@ func (br BeverageRepository) GetAllBeverages() ([]*models.Beverage, error) {
 
 	var beverages []*models.Beverage
 	for rows.Next() {
-		beverage := new(models.Beverage) // Initialize as a pointer
+		beverage := new(models.Beverage)
 		if err := rows.Scan(&beverage.ID, &beverage.Name, &beverage.Type, &beverage.Description, &beverage.Price); err != nil {
 			return nil, err
 		}
@@ -64,7 +78,7 @@ func (br BeverageRepository) GetBeveragesByFilters(beverageType string) ([]*mode
 
 	var beverages []*models.Beverage
 	for rows.Next() {
-		beverage := new(models.Beverage) // Initialize as a pointer
+		beverage := new(models.Beverage)
 		if err := rows.Scan(&beverage.ID, &beverage.Name, &beverage.Type, &beverage.Description, &beverage.Price); err != nil {
 			return nil, err
 		}
@@ -74,7 +88,7 @@ func (br BeverageRepository) GetBeveragesByFilters(beverageType string) ([]*mode
 }
 
 func (br BeverageRepository) GetBeverageByID(id string) (*models.Beverage, error) {
-	beverage := new(models.Beverage) // Initialize as a pointer
+	beverage := new(models.Beverage)
 	query := "SELECT id, name, type, description, price FROM beverages WHERE id = ?"
 	err := br.db.QueryRow(query, id).Scan(&beverage.ID, &beverage.Name, &beverage.Type, &beverage.Description, &beverage.Price)
 	if err != nil {
